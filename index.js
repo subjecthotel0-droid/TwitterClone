@@ -1,6 +1,43 @@
 import { tweetsData } from './data.js'
 import { v4 as uuidv4 } from 'https://jspm.dev/uuid';
 
+function saveTweetStates(){
+    const states = {}
+    tweetsData.forEach(tweet => {
+        states[tweet.uuid] = {
+            likes: tweet.likes,
+            retweets: tweet.retweets,
+            replies: tweet.replies,
+            isLiked: tweet.isLiked,
+            isRetweeted: tweet.isRetweeted
+        }
+    })
+    localStorage.setItem('tweetStates', JSON.stringify(states))
+}
+
+function loadSavedStates(){
+    const raw = localStorage.getItem('tweetStates')
+    if(!raw) return
+    try{
+        const states = JSON.parse(raw)
+        tweetsData.forEach(tweet => {
+            const s = states[tweet.uuid]
+            if(s){
+                tweet.likes = typeof s.likes === 'number' ? s.likes : tweet.likes
+                tweet.retweets = typeof s.retweets === 'number' ? s.retweets : tweet.retweets
+                tweet.replies = Array.isArray(s.replies) ? s.replies : tweet.replies
+                tweet.isLiked = typeof s.isLiked === 'boolean' ? s.isLiked : tweet.isLiked
+                tweet.isRetweeted = typeof s.isRetweeted === 'boolean' ? s.isRetweeted : tweet.isRetweeted
+            }
+        })
+    }catch(err){
+        console.error('Failed to load saved tweet states', err)
+    }
+}
+
+loadSavedStates()
+
+
 document.addEventListener('click', function(e){
     if(e.target.dataset.like){
         handleLikeClick(e.target.dataset.like) 
@@ -32,6 +69,7 @@ function handleLikeClick(tweetId){
     }
     targetTweetObj.isLiked = !targetTweetObj.isLiked
     render()
+    saveTweetStates()
 }
 
 function handleRetweetClick(tweetId){
@@ -46,7 +84,8 @@ function handleRetweetClick(tweetId){
         targetTweetObj.retweets++
     }
     targetTweetObj.isRetweeted = !targetTweetObj.isRetweeted
-    render() 
+    render()
+    saveTweetStates()
 }
 
 function handleReplyClick(replyId){
@@ -69,6 +108,7 @@ function handleTweetBtnClick(tweetId){
             uuid: uuidv4()
         })
         render()
+        saveTweetStates()
         tweetInput.value = ''
         return
     }
@@ -88,6 +128,7 @@ function handleTweetBtnClick(tweetId){
                     tweetText: replyInput.value
                 })
                 render()
+                saveTweetStates()
                 replyInput.value = ''
             }
         }
