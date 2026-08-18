@@ -26,7 +26,7 @@ i{
 }
 
 .retweeted {
-  color: limegreen;
+    color: limegreen;
 }
 
 /* layout */
@@ -96,6 +96,32 @@ button{
 .tweet-detail{
     display: flex;
     gap: 4px;
+}
+
+.tweet-input-reply{
+    border: none;
+    font-size: 14px;
+    padding: 10px;
+    margin: 10px 0 10px 10px;
+    width: 50%;
+}
+
+.tweet-reply.user-reply{
+    position: relative;
+    display: block;
+    padding-bottom: 40px; /* room for the absolutely positioned reply button */
+}
+
+.tweet-reply.user-reply .tweet-inner{
+    display: block; /* make inner content behave like a block on the left */
+    margin-right: 8px;
+}
+
+.tweet-reply .tweet-btn-reply{
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    width: auto;
 }
 
 .tweet-reply{

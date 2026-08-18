@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'https://jspm.dev/uuid';
 
 document.addEventListener('click', function(e){
     if(e.target.dataset.like){
-       handleLikeClick(e.target.dataset.like) 
+        handleLikeClick(e.target.dataset.like) 
     }
     else if(e.target.dataset.retweet){
         handleRetweetClick(e.target.dataset.retweet)
@@ -11,11 +11,14 @@ document.addEventListener('click', function(e){
     else if(e.target.dataset.reply){
         handleReplyClick(e.target.dataset.reply)
     }
+    else if(e.target.dataset.submitReply){
+        handleTweetBtnClick(e.target.dataset.submitReply)
+    }
     else if(e.target.id === 'tweet-btn'){
         handleTweetBtnClick()
     }
 })
- 
+
 function handleLikeClick(tweetId){ 
     const targetTweetObj = tweetsData.filter(function(tweet){
         return tweet.uuid === tweetId
@@ -50,10 +53,10 @@ function handleReplyClick(replyId){
     document.getElementById(`replies-${replyId}`).classList.toggle('hidden')
 }
 
-function handleTweetBtnClick(){
+function handleTweetBtnClick(tweetId){
     const tweetInput = document.getElementById('tweet-input')
 
-    if(tweetInput.value){
+    if(tweetInput && tweetInput.value){
         tweetsData.unshift({
             handle: `@Scrimba`,
             profilePic: `images/scrimbalogo.png`,
@@ -65,10 +68,30 @@ function handleTweetBtnClick(){
             isRetweeted: false,
             uuid: uuidv4()
         })
-    render()
-    tweetInput.value = ''
+        render()
+        tweetInput.value = ''
+        return
     }
 
+    // If tweetId was provided, treat this as submitting a reply for that tweet
+    if(tweetId){
+        const replyInput = document.getElementById(`tweet-input-reply-${tweetId}`)
+        if(replyInput && replyInput.value){
+            const targetTweetObj = tweetsData.filter(function(tweet){
+                return tweet.uuid === tweetId
+            })[0]
+
+            if(targetTweetObj){
+                targetTweetObj.replies.unshift({
+                    handle: `@Scrimba`,
+                    profilePic: `images/scrimbalogo.png`,
+                    tweetText: replyInput.value
+                })
+                render()
+                replyInput.value = ''
+            }
+        }
+    }
 }
 
 function getFeedHtml(){
@@ -88,8 +111,20 @@ function getFeedHtml(){
             retweetIconClass = 'retweeted'
         }
         
-        let repliesHtml = ''
-        
+        let repliesHtml = `    
+        <div class="tweet-reply user-reply">
+            <div class="tweet-inner">
+                <img src="images/scrimbalogo.png" class="profile-pic">
+                <input type = 'text' placeholder = 'Your thoughts...' class ='tweet-input-reply' id='tweet-input-reply-${tweet.uuid}'></input>
+            </div>
+            <div class="tweet-btn-reply">
+            <button id="tweet-btn" data-submit-reply='${tweet.uuid}'>Reply</button>
+            </div>
+
+        </div>
+        `
+
+
         if(tweet.replies.length > 0){
             tweet.replies.forEach(function(reply){
                 repliesHtml+=`
@@ -106,7 +141,7 @@ function getFeedHtml(){
             })
         }
         
-          
+        
         feedHtml += `
 <div class="tweet">
     <div class="tweet-inner">
@@ -141,8 +176,8 @@ function getFeedHtml(){
     </div>   
 </div>
 `
-   })
-   return feedHtml 
+    })
+    return feedHtml 
 }
 
 function render(){
