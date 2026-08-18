@@ -1,6 +1,14 @@
 import { tweetsData } from './data.js'
 import { v4 as uuidv4 } from 'https://jspm.dev/uuid';
 
+const refreshEl = document.getElementById('refresh-btn')
+
+refreshEl.addEventListener('click', function(){
+        localStorage.clear()
+        location.reload()
+    })
+
+
 function saveTweetStates(){
     const states = {}
     tweetsData.forEach(tweet => {
